@@ -143,20 +143,17 @@ def main():
     if args.preset == "auto":
         args.preset = infer_memory_requirements(model_name, device, trust_remote_code=False, token=args.token)
 
-    # TODO(joao) : assisted generation
-    # # Triggers assisted generation on CUDA or MPS devices, assuming the default model is used. Assisted generation is
-    # # not beneficial on most CPU settings.
-    # if  args.model_name is None and ("cuda" in device or device.isdigit() or "mps" in device):
-    #     assistant_model_name = (
-    #         ASSISTANT_MODEL_NAME if args.optimization == "quality" else QUANTIZED_ASSISTANT_MODEL_NAME
-    #     )
-    # else:
-    #     assistant_model_name = None
+    # Triggers assisted generation on CUDA devices, assuming the default model is used. Assisted generation is
+    # not beneficial on most CPU settings.
+    if "27b" == args.model_name is None and ("cuda" in device or device.isdigit()) and "memory" not in args.preset:
+        assistant_model_name = MODEL_NAMES["9b"]
+    else:
+        assistant_model_name = None
 
     if not args.silent:
         print("\nLoading model with the following characteristics:")
         print("- Model name:", model_name)
-        # print("- Assistant model name:", assistant_model_name)
+        print("- Assistant model name:", assistant_model_name)
         print("- Device:", device)
         print("- Data type:", str(dtype))
         print("- Optimization preset:", args.preset)
@@ -173,12 +170,13 @@ def main():
     # TODO(joao): this if shouldn't be needed, fix in transformers
     model._supports_cache_class = True
 
-    # if assistant_model_name is not None:
-    #     assistant_model = LocalGemma2ForCausalLM.from_pretrained(
-    #         assistant_model_name, preset=args.preset, token=args.token, torch_dtype=dtype, device=device)
-    # else:
-        # assistant_model = None
-    assistant_model = None
+    if assistant_model_name is not None:
+        assistant_model = LocalGemma2ForCausalLM.from_pretrained(
+            assistant_model_name, preset=args.preset, token=args.token, torch_dtype=dtype, device=device
+        )
+        assistant_model._supports_cache_class = True
+    else:
+        assistant_model = None
 
     if args.benchmark:
         benchmark(model, tokenizer)
