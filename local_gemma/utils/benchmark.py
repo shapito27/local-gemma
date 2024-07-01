@@ -22,7 +22,7 @@ NUM_RUNS = 5
 WARMUP_RUNS = 3
 
 
-def benchmark(model, tokenizer):
+def benchmark(model, assistant_model, tokenizer):
     """
     Benchmarkes the throughput of the model. Does some warmup before measuring, to remove compilation time (if
     applicable).
@@ -49,7 +49,11 @@ def benchmark(model, tokenizer):
             input_ids = model_inputs.input_ids[:, :prompt_length].to(model.device)
             for _ in tqdm(range(WARMUP_RUNS), desc="Warming up"):
                 model.generate(
-                    input_ids, do_sample=False, max_new_tokens=max_new_tokens, min_new_tokens=max_new_tokens
+                    input_ids,
+                    do_sample=False,
+                    max_new_tokens=max_new_tokens,
+                    min_new_tokens=max_new_tokens,
+                    assistant_model=assistant_model
                 )
 
             tokens_per_second = []

@@ -179,7 +179,7 @@ def main():
         assistant_model = None
 
     if args.benchmark:
-        benchmark(model, tokenizer)
+        benchmark(model, assistant_model, tokenizer)
     else:
         if args.seed is not None:
             set_seed(args.seed)
