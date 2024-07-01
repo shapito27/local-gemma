@@ -145,7 +145,7 @@ def main():
 
     # Triggers assisted generation on CUDA devices, assuming the default model is used. Assisted generation is
     # not beneficial on most CPU settings.
-    if "27b" == args.model is None and ("cuda" in device or device.isdigit()) and "memory" not in args.preset:
+    if "27b" == args.model and ("cuda" in device or device.isdigit()) and "memory" not in args.preset:
         assistant_model_name = MODEL_NAMES["9b"]
     else:
         assistant_model_name = None
